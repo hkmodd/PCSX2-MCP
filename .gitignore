@@ -1,0 +1,25 @@
+# PCSX2 full source tree (too large for repo, given in release zip)
+pcsx2-src/
+
+# Release output
+release/
+
+# Node
+pcsx2-mcp-server/node_modules/
+pcsx2-mcp-server/dist/
+
+# Debug symbols
+*.pdb
+*.exp
+*.lib
+
+# IDE
+.vs/
+.vscode/
+*.suo
+*.user
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
