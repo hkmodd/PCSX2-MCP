@@ -633,6 +633,8 @@ namespace DebugServer
 		// ----- RESUME -----
 		else if (cmd == "resume")
 		{
+			// Skip current BP if we're sitting on one (matches PCSX2 GUI behavior)
+			CBreakPoints::SetSkipFirst(getBpCpu(cpuName), cpu->getPC());
 			cpu->resumeCpu();
 			j.startObject();
 			j.kv("ok", true);
