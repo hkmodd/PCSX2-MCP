@@ -1,4 +1,10 @@
-# PCSX2-MCP — PlayStation 2 AI Debugger Bridge
+
+# PCSX2-MCP
+<p align="center">
+<img width="500" height="500" alt="PCSX2-MCP" src="https://github.com/user-attachments/assets/e35e394e-87f0-4ce5-ab14-e4fdcfa079ca" />
+</p>
+
+##  A PCSX2 modification and MCP server
 
 > **Control a PS2 emulator from your AI coding assistant.**
 > Set breakpoints, read registers, disassemble MIPS, inspect memory — all via MCP tools.
