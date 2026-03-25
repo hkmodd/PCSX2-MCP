@@ -781,7 +781,7 @@ namespace DebugServer
 
 			j.startObject();
 			j.kv("ok", true);
-			j.kv("frame_count", (int64_t)std::min((int)frames.size(), maxFrames));
+			j.kv("frame_count", (int64_t)(std::min)((int)frames.size(), maxFrames));
 			j.key("frames"); j.startArray();
 			int count = 0;
 			for (const auto& f : frames)
