@@ -65,9 +65,9 @@ namespace DebugServer
 	class JsonBuilder
 	{
 	public:
-		void startObject() { m_buf += '{'; m_needComma.push_back(false); }
+		void startObject() { comma(); m_buf += '{'; m_needComma.push_back(false); }
 		void endObject() { m_buf += '}'; m_needComma.pop_back(); if (!m_needComma.empty()) m_needComma.back() = true; }
-		void startArray() { m_buf += '['; m_needComma.push_back(false); }
+		void startArray() { comma(); m_buf += '['; m_needComma.push_back(false); }
 		void endArray() { m_buf += ']'; m_needComma.pop_back(); if (!m_needComma.empty()) m_needComma.back() = true; }
 
 		void key(const char* k)
