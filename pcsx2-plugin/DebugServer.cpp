@@ -41,6 +41,7 @@ typedef int socket_t;
 #include "DebugServer.h"
 #include "DebugInterface.h"
 #include "Breakpoints.h"
+#include "MipsStackWalk.h"
 
 #include <cstring>
 #include <cstdio>
@@ -748,6 +749,52 @@ namespace DebugServer
 				j.kv("name", m.name);
 				j.kv("version", (int64_t)m.version);
 				j.endObject();
+			}
+			j.endArray();
+			j.endObject();
+		}
+		// ----- GET BACKTRACE -----
+		else if (cmd == "get_backtrace")
+		{
+			int maxFrames = (int)getNum(params, "max_frames", 32);
+			if (maxFrames > 128) maxFrames = 128;
+
+			u32 pc = cpu->getPC();
+			u32 ra = cpu->getRegister(0, 31); // $ra
+			u32 sp = cpu->getRegister(0, 29); // $sp
+
+			// Find the running thread to get entry point and stack top
+			u32 threadEntry = 0;
+			u32 threadStackTop = 0;
+			auto threads = cpu->GetThreadList();
+			for (const auto& t : threads)
+			{
+				if (t->Status() == ThreadStatus::THS_RUN)
+				{
+					threadEntry = t->EntryPoint();
+					threadStackTop = t->StackTop();
+					break;
+				}
+			}
+
+			auto frames = MipsStackWalk::Walk(cpu, pc, ra, sp, threadEntry, threadStackTop);
+
+			j.startObject();
+			j.kv("ok", true);
+			j.kv("frame_count", (int64_t)std::min((int)frames.size(), maxFrames));
+			j.key("frames"); j.startArray();
+			int count = 0;
+			for (const auto& f : frames)
+			{
+				if (count >= maxFrames) break;
+				j.startObject();
+				j.key("entry"); j.valHex32(f.entry);
+				j.key("pc"); j.valHex32(f.pc);
+				j.key("sp"); j.valHex32(f.sp);
+				j.kv("stack_size", (int64_t)f.stackSize);
+				j.kv("disasm", cpu->disasm(f.pc, true));
+				j.endObject();
+				count++;
 			}
 			j.endArray();
 			j.endObject();

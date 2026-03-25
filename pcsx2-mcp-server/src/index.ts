@@ -424,6 +424,22 @@ server.tool('pcsx2_get_modules', 'List loaded IOP modules.',
 );
 
 // ==========================================================
+//  TOOL: pcsx2_get_backtrace
+// ==========================================================
+server.tool('pcsx2_get_backtrace', 'Get call stack backtrace (stack walk). Shows function entry points, PCs, stack pointers, and disassembly for each frame. Requires DebugServer + paused state.',
+  { cpu: z.enum(['ee', 'iop']).default('ee'), max_frames: z.number().min(1).max(128).default(32) },
+  async ({ cpu, max_frames }) => {
+    if (!hasDebug()) return { content: [{ type: 'text' as const, text: 'Error: DebugServer not connected.' }], isError: true };
+    try {
+      const frames = await debugServer!.getBacktrace(cpu, max_frames);
+      if (frames.length === 0) return { content: [{ type: 'text' as const, text: 'No stack frames (may not be paused, or no thread running).' }] };
+      const lines = frames.map((f, i) => `#${i} entry=${f.entry} pc=${f.pc} sp=${f.sp} size=${f.stack_size}  ${f.disasm}`);
+      return { content: [{ type: 'text' as const, text: `Call stack (${frames.length} frames):\n${lines.join('\n')}` }] };
+    } catch (e: any) { return { content: [{ type: 'text' as const, text: `Error: ${e.message}` }], isError: true }; }
+  }
+);
+
+// ==========================================================
 //  TOOL: pcsx2_game_info / save_state / load_state (Pine)
 // ==========================================================
 server.tool('pcsx2_game_info', 'Get game title, ID, version from PCSX2. Requires Pine.',

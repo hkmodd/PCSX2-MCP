@@ -368,6 +368,13 @@ export class DebugServerClient {
     return resp.modules;
   }
 
+  /** Get call stack backtrace using PCSX2's MipsStackWalk */
+  async getBacktrace(cpu: CpuTarget = 'ee', maxFrames = 32): Promise<Array<{ entry: string; pc: string; sp: string; stack_size: number; disasm: string }>> {
+    const resp = await this.send({ cmd: 'get_backtrace', cpu, max_frames: maxFrames });
+    if (!resp.ok) throw new Error(resp.error);
+    return resp.frames;
+  }
+
   // ===== Bulk Operations =====
 
   async clearAllBreakpoints(): Promise<void> {
