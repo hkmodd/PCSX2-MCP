@@ -272,6 +272,15 @@ PCSX2-MCP-v1.0.0-win64/          ← ready to run, everything pre-built
 <details>
 <summary>Only needed if you want to modify PCSX2 or the MCP server</summary>
 
+### Prerequisites
+
+| Component | Requires |
+|---|---|
+| **PCSX2** | Git, CMake ≥ 3.22, Ninja, MSVC (Visual Studio 2022), Qt 6 |
+| **MCP Server** | [Node.js](https://nodejs.org/) ≥ 18 (includes npm) |
+
+> All MCP server dependencies (`@modelcontextprotocol/sdk`, `zod`, `typescript`) are declared in `package.json` and installed automatically by `npm install`. You do **not** need to install them manually.
+
 ### PCSX2
 
 ```powershell
@@ -295,8 +304,12 @@ cmake --build build --target pcsx2-qt
 
 ```bash
 cd pcsx2-mcp-server
+
+# Install all dependencies (MCP SDK, Zod, TypeScript, etc.)
 npm install
-npm run build   # TypeScript → dist/index.js
+
+# Compile TypeScript → dist/index.js
+npm run build
 ```
 
 </details>
