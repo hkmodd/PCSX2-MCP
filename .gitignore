@@ -29,3 +29,5 @@ build-pcsx2-log.bat
 build-pcsx2.bat
 pcsx2-build.log
 PCSX2-MCP.lnk
+package-release.ps1
+setup-mcp.bat
