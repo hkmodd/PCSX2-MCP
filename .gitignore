@@ -23,3 +23,8 @@ pcsx2-mcp-server/dist/
 Thumbs.db
 Desktop.ini
 .DS_Store
+build-pcsx2-deps.bat
+build-pcsx2-j1.bat
+build-pcsx2-log.bat
+build-pcsx2.bat
+pcsx2-build.log
