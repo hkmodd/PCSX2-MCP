@@ -38,10 +38,24 @@ Write-Host "=== Packaging PCSX2-MCP v${Version} ===" -ForegroundColor Cyan
 
 Write-Host "`n[1/4] Copying PCSX2 binaries (release only)..." -ForegroundColor Yellow
 
-# Copy exe + release DLLs (exclude debug DLLs, PDBs, build artifacts)
+# Build a set of REAL debug DLLs: a DLL ending in 'd.dll' is debug ONLY if
+# a corresponding release DLL exists (e.g. Qt6Cored.dll is debug because Qt6Core.dll exists)
+$allDlls = Get-ChildItem $buildDir -File -Filter '*.dll' | ForEach-Object { $_.Name }
+$debugDlls = @{}
+foreach ($name in $allDlls) {
+    if ($name -match '^(.+)d\.dll$') {
+        $releaseName = $Matches[1] + '.dll'
+        if ($allDlls -contains $releaseName) {
+            $debugDlls[$name] = $true
+        }
+    }
+}
+Write-Host "  Debug DLLs detected: $($debugDlls.Keys -join ', ')" -ForegroundColor DarkGray
+
+# Copy exe + release DLLs (exclude confirmed debug DLLs, PDBs, build artifacts)
 Get-ChildItem $buildDir -File | Where-Object {
     $_.Extension -in @('.exe', '.dll', '.qm') -and
-    $_.Name -notmatch 'd\.(dll)$' -and       # skip *d.dll (debug)
+    -not $debugDlls.ContainsKey($_.Name) -and
     $_.Name -ne 'pcsx2-qt.exp' -and
     $_.Name -ne 'pcsx2-qt.lib'
 } | ForEach-Object {
@@ -59,10 +73,18 @@ foreach ($dir in $qtPluginDirs) {
         $destDir = Join-Path $outDir $dir
         New-Item $destDir -ItemType Directory -Force | Out-Null
         
-        # Copy only release DLLs (no *d.dll, no *.pdb)
+        # Copy only release DLLs (skip confirmed debug DLLs)
+        $pluginDlls = Get-ChildItem $srcDir -File -Filter '*.dll' | ForEach-Object { $_.Name }
+        $pluginDebug = @{}
+        foreach ($pn in $pluginDlls) {
+            if ($pn -match '^(.+)d\.dll$') {
+                $prn = $Matches[1] + '.dll'
+                if ($pluginDlls -contains $prn) { $pluginDebug[$pn] = $true }
+            }
+        }
         Get-ChildItem $srcDir -File | Where-Object {
             $_.Extension -eq '.dll' -and
-            $_.Name -notmatch 'd\.dll$'
+            -not $pluginDebug.ContainsKey($_.Name)
         } | ForEach-Object {
             Copy-Item $_.FullName $destDir
         }
