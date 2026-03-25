@@ -58,7 +58,7 @@ Run `setup-mcp.bat` — it checks Node.js and writes the MCP config for you.
 3. Restart your AI assistant (Antigravity / Claude Desktop)
 4. Ask: *"Connect to PCSX2 and show me the thread list"*
 
-That's it! Your AI assistant now has **29 debugging tools** for PS2.
+That's it! Your AI assistant now has **30 debugging tools** for PS2.
 
 ---
 
@@ -136,7 +136,7 @@ Translates MCP tool calls into DebugServer TCP commands. Also supports **Pine IP
 
 ---
 
-## All 29 Tools
+## All 30 Tools
 
 ### Connection & Status
 | Tool | Description |
@@ -189,6 +189,7 @@ Translates MCP tool calls into DebugServer TCP commands. Also supports **Pine IP
 |---|---|
 | `pcsx2_get_threads` | List EE/IOP BIOS threads |
 | `pcsx2_get_modules` | List loaded IOP modules |
+| `pcsx2_get_backtrace` | Call stack walk — entry points, PCs, stack pointers, frame sizes |
 | `pcsx2_game_info` | Game title/ID/version (Pine) |
 | `pcsx2_save_state` | Save state to slot 0-9 (Pine) |
 | `pcsx2_load_state` | Load state from slot (Pine) |
@@ -218,6 +219,14 @@ Translates MCP tool calls into DebugServer TCP commands. Also supports **Pine IP
 > "Take a memory snapshot of 0x200000, size 4096"
   (do something in the game)
 > "Diff the snapshot to find changes"
+```
+
+### Debugging a crash with call stack
+```
+> "Pause the emulator"
+> "Get the backtrace"
+> "Disassemble the function at entry 0x00125bf4"
+> "Read registers to see what went wrong"
 ```
 
 ### Comparing with PS2Recomp
