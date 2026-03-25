@@ -640,8 +640,11 @@ namespace DebugServer
 		// ----- STEP -----
 		else if (cmd == "step")
 		{
-			// Set a temporary breakpoint at PC+4, then resume
 			u32 pc = cpu->getPC();
+
+			// Skip current BP if we're sitting on one (matches PCSX2 GUI behavior)
+			CBreakPoints::SetSkipFirst(getBpCpu(cpuName), pc);
+
 			u32 nextPc = pc + 4;
 			CBreakPoints::AddBreakPoint(getBpCpu(cpuName), nextPc, true, true, true);
 			cpu->resumeCpu();
@@ -655,13 +658,15 @@ namespace DebugServer
 			}
 
 			u32 newPc = cpu->getPC();
+			bool inBios = (newPc < 0x00100000) || (newPc >= 0x80000000 && newPc < 0x80100000);
+
 			j.startObject();
 			j.kv("ok", true);
 			j.key("old_pc"); j.valHex32(pc);
 			j.key("new_pc"); j.valHex32(newPc);
 			j.kv("disasm", cpu->disasm(newPc, true));
+			j.kv("in_bios", inBios);
 
-			// Include instruction at new PC
 			bool valid = true;
 			u32 opcode = cpu->read32(newPc, valid);
 			j.key("opcode"); j.valHex32(opcode);
@@ -670,8 +675,11 @@ namespace DebugServer
 		// ----- STEP OVER -----
 		else if (cmd == "step_over")
 		{
-			// For JAL/JALR instructions, set breakpoint after the delay slot
 			u32 pc = cpu->getPC();
+
+			// Skip current BP if we're sitting on one (matches PCSX2 GUI behavior)
+			CBreakPoints::SetSkipFirst(getBpCpu(cpuName), pc);
+
 			bool valid = true;
 			u32 opcode = cpu->read32(pc, valid);
 			u32 op = (opcode >> 26) & 63;
@@ -680,12 +688,10 @@ namespace DebugServer
 			if (op == 3 || // JAL
 				(op == 0 && (opcode & 63) == 9)) // JALR
 			{
-				// It's a call — set BP after delay slot
 				bpAddr = pc + 8;
 			}
 			else
 			{
-				// Normal step
 				bpAddr = pc + 4;
 			}
 
@@ -700,11 +706,14 @@ namespace DebugServer
 			}
 
 			u32 newPc = cpu->getPC();
+			bool inBios = (newPc < 0x00100000) || (newPc >= 0x80000000 && newPc < 0x80100000);
+
 			j.startObject();
 			j.kv("ok", true);
 			j.key("old_pc"); j.valHex32(pc);
 			j.key("new_pc"); j.valHex32(newPc);
 			j.kv("disasm", cpu->disasm(newPc, true));
+			j.kv("in_bios", inBios);
 			j.endObject();
 		}
 		// ----- GET THREADS -----
