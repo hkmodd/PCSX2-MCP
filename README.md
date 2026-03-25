@@ -11,6 +11,28 @@
 └─────────────┘                  └─────────────────────┘    TCP:28011    └─────────────────┘
 ```
 
+---
+
+## ⚠️ Repository vs Release — Read This First
+
+> **This git repo does NOT contain the full PCSX2 source code.**
+> We only provide the source of our modifications to avoid wasting storage uploading 1 GB of upstream code.
+
+| | This Git Repo | GitHub Release (zip) |
+|---|---|---|
+| **Purpose** | Source code only | Ready-to-run package |
+| **PCSX2 binaries** | ❌ Not included | ✅ Pre-built `pcsx2-qt.exe` + all DLLs |
+| **PCSX2 full source** | ❌ Not included (see [upstream](https://github.com/PCSX2/pcsx2)) | ❌ Not included |
+| **DebugServer patch** | ✅ `pcsx2-plugin/DebugServer.cpp` + `.h` | ✅ Included (already compiled in) |
+| **MCP server source** | ✅ `pcsx2-mcp-server/src/` | ✅ Pre-built `dist/` + `node_modules/` |
+| **Setup script** | ✅ `setup-mcp.bat` | ✅ Included |
+
+**Want to just USE it?** → Download the **[latest Release](../../releases)** zip. Everything is pre-built.
+
+**Want to modify or rebuild?** → Clone this repo, then follow [Building from Source](#building-from-source) below.
+
+---
+
 ## Quick Start (3 steps)
 
 ### 1. Download
@@ -203,9 +225,27 @@ Translates MCP tool calls into DebugServer TCP commands. Also supports **Pine IP
 
 ## Architecture
 
+### Git Repository
 ```
-PCSX2-MCP/
-├── pcsx2-qt.exe                 ← pre-built PCSX2 with DebugServer
+PCSX2-MCP/                       ← source code only, lightweight
+├── pcsx2-plugin/
+│   ├── DebugServer.cpp          ← our custom patch for PCSX2 (this is the only PCSX2 modification)
+│   └── DebugServer.h
+├── pcsx2-mcp-server/
+│   ├── src/index.ts             ← MCP server source (TypeScript)
+│   ├── src/debug-server-client.ts
+│   ├── src/pine-client.ts
+│   ├── package.json
+│   └── tsconfig.json
+├── README.md
+├── setup-mcp.bat
+└── package-release.ps1
+```
+
+### GitHub Release (zip)
+```
+PCSX2-MCP-v1.0.0-win64/          ← ready to run, everything pre-built
+├── pcsx2-qt.exe                 ← PCSX2 with DebugServer already compiled in
 ├── *.dll                        ← Qt + runtime dependencies
 ├── platforms/                   ← Qt platform plugins
 ├── resources/                   ← PCSX2 shaders, GameDB, etc
@@ -213,9 +253,9 @@ PCSX2-MCP/
 │   ├── dist/index.js            ← compiled MCP server
 │   └── node_modules/            ← pre-installed dependencies
 ├── source/
-│   ├── DebugServer.cpp          ← custom DebugServer source
+│   ├── DebugServer.cpp          ← patch source (GPL compliance)
 │   └── DebugServer.h
-├── setup-mcp.bat                ← one-click setup
+├── setup-mcp.bat
 └── README.md
 ```
 
@@ -229,18 +269,18 @@ PCSX2-MCP/
 ### PCSX2
 
 ```powershell
-# Clone PCSX2 main repo
+# 1. Clone the upstream PCSX2 source (we don't include it in this repo to save space)
 git clone https://github.com/PCSX2/pcsx2.git pcsx2-src
 cd pcsx2-src
 
-# Copy DebugServer files
-cp ../source/DebugServer.cpp pcsx2/DebugTools/
-cp ../source/DebugServer.h pcsx2/DebugTools/
+# 2. Copy our DebugServer patch into the PCSX2 source tree
+cp ../pcsx2-plugin/DebugServer.cpp pcsx2/DebugTools/
+cp ../pcsx2-plugin/DebugServer.h pcsx2/DebugTools/
 
-# Add to CMakeLists.txt (in pcsx2/DebugTools/)
+# 3. Add to CMakeLists.txt (in pcsx2/DebugTools/)
 # Add DebugServer.cpp and DebugServer.h to the source list
 
-# Build with CMake + Ninja + MSVC
+# 4. Build with CMake + Ninja + MSVC
 cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --target pcsx2-qt
 ```
@@ -275,4 +315,4 @@ npm run build   # TypeScript → dist/index.js
 - **DebugServer plugin**: GPL-3.0 (derivative work)
 - **MCP Server**: MIT
 
-This project packages a modified version of PCSX2 under GPL-3.0. Full source for the modifications is included in the `source/` directory.
+The GitHub Release includes a pre-built PCSX2 binary (GPL-3.0). Full source for our modifications is provided in `pcsx2-plugin/` (this repo) and also bundled in the release zip under `source/`. The unmodified PCSX2 source is available at [github.com/PCSX2/pcsx2](https://github.com/PCSX2/pcsx2).
